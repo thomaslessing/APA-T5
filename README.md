@@ -232,6 +232,39 @@ estereo2mono('wav_komm.wav', 'semisuma.wav')
 estereo2mono('wav_komm.wav', 'semidiferencia.wav', canal=3)
 ```
 ##### Código de `mono2estereo()`
+```python
+def mono2stereo(ficIzq, ficDer, ficEste):
+    """
+    Reconstruye un archivo estéreo a partir de dos archivos mono (izquierdo y derecho).
+
+    Parametros:
+    ficIzq -- archivo mono con el canal izquierdo
+    ficDer -- archivo mono con el canal derecho
+    ficEste -- archivo de salida estéreo reconstruido
+    """
+    with open(ficIzq, 'rb') as f_izq, open(ficDer, 'rb') as f_der:
+        cab_izq = leer_cabecera_wave(f_izq)
+        cab_der = leer_cabecera_wave(f_der)
+
+        if cab_izq['num_channels'] != 1 or cab_der['num_channels'] != 1:
+            raise ValueError('Ambos ficheros deben ser monofónicos')
+        if cab_izq['sample_rate'] != cab_der['sample_rate']:
+            raise ValueError('Las frecuencias de muestreo no coinciden')
+        if cab_izq['bits_per_sample'] != cab_der['bits_per_sample']:
+            raise ValueError('Los bits por muestra no coinciden')
+        if cab_izq['data_size'] != cab_der['data_size']:
+            raise ValueError('Las longitudes de los datos no coinciden')
+
+        datos_izq = f_izq.read(cab_izq['data_size'])
+        datos_der = f_der.read(cab_der['data_size'])
+
+    tam = cab_izq['bits_per_sample'] // 8
+    datos_stereo = b''.join([datos_izq[i:i+tam] + datos_der[i:i+tam] for i in range(0, len(datos_izq), tam)])
+
+    with open(ficEste, 'wb') as f_out:
+        escribir_cabecera_wave(f_out, 2, cab_izq['sample_rate'], cab_izq['bits_per_sample'], len(datos_stereo))
+        f_out.write(datos_stereo)
+```
 
 ##### Código de `codEstereo()`
 
