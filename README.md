@@ -217,6 +217,20 @@ def estereo2mono(ficEste, ficMono, canal=2):
         escribir_cabecera_wave(f_out, 1, cab['sample_rate'], cab['bits_per_sample'], len(datos_mono))
         f_out.write(datos_mono)
 ```
+##### Pruebas código de `estereo2mono()`
+```python
+# Canal izquierdo
+estereo2mono('wav_komm.wav', 'canal_izquierdo.wav', canal=0)
+
+# Canal derecho
+estereo2mono('wav_komm.wav', 'canal_derecho.wav', canal=1)
+
+# Semisuma (por defecto)
+estereo2mono('wav_komm.wav', 'semisuma.wav')
+
+# Semidiferencia
+estereo2mono('wav_komm.wav', 'semidiferencia.wav', canal=3)
+```
 ##### Código de `mono2estereo()`
 
 ##### Código de `codEstereo()`
