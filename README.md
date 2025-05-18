@@ -270,12 +270,64 @@ def mono2stereo(ficIzq, ficDer, ficEste):
 mono2stereo('canal_izquierdo.wav', 'canal_derecho.wav', 'reconstruido.wav')
 ```
 ##### Código de `codEstereo()`
+```python
+def codEstereo(ficEste, ficCod):
+    """
+    Codifica una señal estéreo de 16 bits como una señal mono de 32 bits.
+    La semisuma se guarda en los 16 bits altos y la semidiferencia en los 16 bits bajos.
+
+    Parametros:
+    ficEste -- archivo estéreo de entrada
+    ficCod -- archivo mono de salida codificado
+    """
+    with open(ficEste, 'rb') as f_in:
+        cab = leer_cabecera_wave(f_in)
+        if cab['num_channels'] != 2 or cab['bits_per_sample'] != 16:
+            raise ValueError('El fichero debe ser estéreo de 16 bits')
+        datos = f_in.read(cab['data_size'])
+
+    muestras = [struct.unpack('<hh', datos[i:i+4]) for i in range(0, len(datos), 4)]
+    codificadas = [struct.pack('<I', (((L + R) // 2 & 0xFFFF) << 16) | ((L - R) // 2 & 0xFFFF)) for L, R in muestras]
+    datos_cod = b''.join(codificadas)
+
+    with open(ficCod, 'wb') as f_out:
+        escribir_cabecera_wave(f_out, 1, cab['sample_rate'], 32, len(datos_cod))
+        f_out.write(datos_cod)
+```
 ##### Pruebas código de `codEstereo()`
 ```python
 codEstereo('wav_komm.wav', 'codificado.wav')
 ```
 
 ##### Código de `decEstereo()`
+```python
+def decEstereo(ficCod, ficEste):
+    """
+    Decodifica una señal mono de 32 bits en una señal estéreo de 16 bits por canal.
+
+    Parametros:
+    ficCod -- archivo mono de 32 bits codificado
+    ficEste -- archivo de salida estéreo reconstruido
+    """
+    with open(ficCod, 'rb') as f_in:
+        cab = leer_cabecera_wave(f_in)
+        if cab['num_channels'] != 1 or cab['bits_per_sample'] != 32:
+            raise ValueError('El fichero debe ser monofónico de 32 bits')
+        datos = f_in.read(cab['data_size'])
+
+    muestras = [struct.unpack('<I', datos[i:i+4])[0] for i in range(0, len(datos), 4)]
+    reconstruidas = [
+        struct.pack('<hh',
+            saturar16((m >> 16) + int16(m & 0xFFFF)),
+            saturar16((m >> 16) - int16(m & 0xFFFF))
+        ) for m in muestras
+    ]
+    datos_estereo = b''.join(reconstruidas)
+
+    with open(ficEste, 'wb') as f_out:
+        escribir_cabecera_wave(f_out, 2, cab['sample_rate'], 16, len(datos_estereo))
+        f_out.write(datos_estereo)
+```
 ##### Pruebas código de `decEstereo()`
 ```python
 decEstereo('codificado.wav', 'recuperado.wav')
