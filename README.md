@@ -190,6 +190,32 @@ pantalla, debe hacerse en formato *markdown*).
 
 ##### Código de `estereo2mono()`
 
+def estereo2mono(ficEste, ficMono, canal=2):
+    """
+    Convierte un archivo estéreo WAVE de 16 bits a mono según el canal indicado.
+
+    Parametros:
+    ficEste -- ruta del archivo de entrada estéreo
+    ficMono -- ruta del archivo de salida mono
+    channel  -- modo de conversión:
+                0 = solo canal izquierdo,
+                1 = solo canal derecho,
+                2 = promedio (semisuma),
+                3 = semidiferencia (izq - der) / 2
+    """
+    with open(ficEste, 'rb') as f_in:
+        cab = leer_cabecera_wave(f_in)
+        if cab['num_channels'] != 2:
+            raise ValueError('El archivo no es estéreo')
+        datos = f_in.read(cab['data_size'])
+
+    tam = cab['bits_per_sample'] // 8
+    muestras = [datos[i:i+2*tam] for i in range(0, len(datos), 2*tam)]
+    datos_mono = b''.join([procesar_muestra(m, tam, canal) for m in muestras])
+
+    with open(ficMono, 'wb') as f_out:
+        escribir_cabecera_wave(f_out, 1, cab['sample_rate'], cab['bits_per_sample'], len(datos_mono))
+        f_out.write(datos_mono)
 ##### Código de `mono2estereo()`
 
 ##### Código de `codEstereo()`
