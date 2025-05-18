@@ -265,10 +265,21 @@ def mono2stereo(ficIzq, ficDer, ficEste):
         escribir_cabecera_wave(f_out, 2, cab_izq['sample_rate'], cab_izq['bits_per_sample'], len(datos_stereo))
         f_out.write(datos_stereo)
 ```
-
+##### Pruebas código de `mono2stereo()`
+```python
+mono2stereo('canal_izquierdo.wav', 'canal_derecho.wav', 'reconstruido.wav')
+```
 ##### Código de `codEstereo()`
+##### Pruebas código de `codEstereo()`
+```python
+codEstereo('wav_komm.wav', 'codificado.wav')
+```
 
 ##### Código de `decEstereo()`
+##### Pruebas código de `decEstereo()`
+```python
+decEstereo('codificado.wav', 'recuperado.wav')
+```
 
 #### Subida del resultado al repositorio GitHub y *pull-request*
 
