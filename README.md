@@ -189,7 +189,7 @@ para que se realice el realce sintáctico en Python del mismo (no vale insertar 
 pantalla, debe hacerse en formato *markdown*).
 
 ##### Código de `estereo2mono()`
-
+```python
 def estereo2mono(ficEste, ficMono, canal=2):
     """
     Convierte un archivo estéreo WAVE de 16 bits a mono según el canal indicado.
@@ -216,6 +216,7 @@ def estereo2mono(ficEste, ficMono, canal=2):
     with open(ficMono, 'wb') as f_out:
         escribir_cabecera_wave(f_out, 1, cab['sample_rate'], cab['bits_per_sample'], len(datos_mono))
         f_out.write(datos_mono)
+```
 ##### Código de `mono2estereo()`
 
 ##### Código de `codEstereo()`
